@@ -1,5 +1,5 @@
 from unittest import TestCase
-from venv.Cell import Cell
+from Cell import Cell
 
 c = Cell(0, 0, 9, False)
 
