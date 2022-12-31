@@ -6,21 +6,25 @@ class Cell:
         # value: actually solution value. user_value: number the user has entered
         self.value = value
         self.user_value = user_value
-
         self.given = given
         self.correct = False
-        self.notes = []
+
+        self.notes = {
+            1: False,
+            2: False,
+            3: False,
+            4: False,
+            5: False,
+            6: False,
+            7: False,
+            8: False,
+            9: False
+        }
 
     # adds the given number to the notes of the cell
-    def add_note(self, num):
-        # only add if given number is not already a note
-        if self.notes.count(num) == 0:
-            self.notes.append(num)
+    def switch_note(self, num):
+        if not self.given:
+            self.notes[num] = not self.notes[num]
 
-    # if found in the cell's notes, removes the number from notes
-    def remove_note(self, num):
-        if self.notes.count(num) > 0:
-            self.notes.remove(num)
-
-    def set_value(self, num):
-        self.value = num
+    def set_user_value(self, num):
+        self.user_value = num

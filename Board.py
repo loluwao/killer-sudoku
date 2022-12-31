@@ -15,8 +15,27 @@ class Board:
                     row.append(0)
                 self.solution.append(row)
         self.user_board = user_board
-        self.starting_board = None
+        if user_board == []:
+            for i in range(9):
+                row = []
+                for j in range(9):
+                    row.append(0)
+                self.user_board.append(row)
+        self.starting_board = []
+        for i in range(9):
+            row = []
+            for j in range(9):
+                row.append(0)
+            self.starting_board.append(row)
+
         self.num_solutions = 0
+        self.current_cell = (0, 0) # (x, y)
+        self.initialize()
+        self.remove_nums()
+        self.copy_solution()
+        self.notes_mode = False
+        self.most_recent = ()
+
 
     # initializes a solution board for the game
     def initialize(self):
@@ -36,7 +55,7 @@ class Board:
                                 return True
                 self.solution[r][c] = 0
                 break
-        self.starting_board = self.solution
+        #self.starting_board = self.solution
         return False
 
     # determines if solution board has been filled with numbers
@@ -54,8 +73,8 @@ class Board:
             print("\n")
 
     # sets the slot at the given row and column to the given number
-    def set_cell(self, row, col, num):
-        self.solution[row][col].set_value(num)
+    #def set_cell(self, num):
+        #self.user_board[self.current_cell[1]][self.current_cell[0]].set_user_value(num)
 
     # checks if a number can be put in that row and column
     def can_add_cell(self, row, column, number_to_add):
@@ -86,19 +105,76 @@ class Board:
 
     # removes numbers that won't be visible on the board
     def remove_nums(self):
-        nums = random.randint(50, 65)
-        for x in range(nums):
+        for i in range(9):
+            for j in range(9):
+                self.starting_board[i][j] = self.solution[i][j]
+        nums = random.randint(70, 75)
+        for x in range(nums): #CHANGE BACK
             cell, row, col = 0, 0, 0
             while cell == 0:
                 # pick random row and column
-                row = random.randint(0, 9)
-                col = random.randint(0, 9)
-
-                cell = self.starting_board[row][col]
+                row = random.randint(0, 8)
+                col = random.randint(0, 8)
+                cell = self.solution[row][col]
 
             self.starting_board[row][col] = 0
 
+    # transfers solution to the board the user will see
     def copy_solution(self):
         for r in range(9):
             for c in range(9):
-                self.user_board[r][c] = Cell(c, r, self.solution, 0, self.starting_board[r][c] != 0)
+                self.user_board[r][c] = Cell(c, r, self.solution[r][c], 0, self.starting_board[r][c] != 0)
+
+    # sets the current highlighted cell to the given coordinates
+    def set_current_cell(self, row, col):
+        self.current_cell = (col, row)
+
+    def change_cell_notes(self, num):
+        self.user_board[self.current_cell[1]][self.current_cell[0]].switch_note(num)
+
+    def reset_notes(self):
+        for x in range(1, 10):
+            self.user_board[self.current_cell[1]][self.current_cell[0]].notes[x] = False
+    # sets the current cell to the given number if it wasn't already given
+    def set_entry(self, num):
+        if self.user_board[self.current_cell[1]][self.current_cell[0]].given:
+            print("You can't enter a number here, it was already given to you!")
+        else:
+            self.user_board[self.current_cell[1]][self.current_cell[0]].set_user_value(num)
+
+    # determines if game has been won yet
+    def game_over(self):
+        for i in range(9):
+            for j in range(9):
+                if not self.user_board[i][j].given:
+                    if self.user_board[i][j].user_value != self.solution[i][j]:
+                        return False
+        return True
+
+    def set_most_recent(self, row, col):
+        self.most_recent = (col, row)
+
+    def update_surrounding_notes(self):
+        # most recent user-entered value
+        row = self.most_recent[1]
+        col = self.most_recent[0]
+        val = self.user_board[row][col].user_value
+
+        # modify row
+        for cell in self.user_board[row]:
+            cell.notes[val] = False
+
+        # modify col
+        for r in self.user_board:
+            r[col].notes[val] = False
+
+        # modify 3x3 box
+        x = col // 3
+        y = row // 3
+        x *= 3
+        y *= 3
+
+        for r in range(y, y + 3):
+            for c in range(x, x + 3):
+                self.user_board[r][c].notes[val] = False
+
