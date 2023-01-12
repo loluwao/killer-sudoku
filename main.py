@@ -16,7 +16,7 @@ f = pygame.font.SysFont("Arial", 30)
 ff = pygame.font.SysFont("Arial", 12)
 win = pygame.display.set_mode((720, 720))
 
-possible_numers = {
+possible_numbers = {
     pygame.K_1: 1,
     pygame.K_2: 2,
     pygame.K_3: 3,
@@ -28,9 +28,8 @@ possible_numers = {
     pygame.K_9: 9,
     pygame.K_BACKSPACE: 0
 }
-def draw_game():
-    #pygame.time.delay(100)
 
+def draw_game():
     global num
     win.fill((255, 255, 255))
 
@@ -50,14 +49,6 @@ def draw_game():
         pygame.draw.line(win, BLACK, (135, y), (585, y), thickness)
         x += 50
         y += 50
-
-    # draw number buttons
-    x = 135
-    for i in range(1, 10):
-        num = f.render(str(i), True, BLACK)
-        pygame.draw.rect(win, BLACK, ((x, 600), (50, 50)), 1)
-        win.blit(num, (x + 17, 607))
-        x += 50
 
     # draw numbers on board
     x, y = 152, 122
@@ -96,8 +87,9 @@ def draw_game():
 
 
     # MODIFY LATER
-    if b.game_over():
-        pygame.draw.rect(win, WHITE, ((360, 360), (400, 200)))
+    #if b.game_over():
+
+    pygame.draw.rect(win, PURPLE, ((211, 240), (300, 200)))
 
 
     pygame.display.update()
@@ -109,15 +101,19 @@ def find_position(pos):
     if x <= 585 and x >= 135 and y >= 115:
         return ((x - 135) // 50, (y - 115) // 50)
 
+#draw_game()
 b.print_board()
 
 run = True
 x, y = 0, 0
 selected = ()
 print(b.user_board[0][0].value)
+
 while run:
+    pygame.event.get()
     pygame.time.delay(100)
-    #draw_game()
+
+    draw_game()
     #b.play_game()
     if not b.game_over():
         for event in pygame.event.get():
@@ -132,9 +128,9 @@ while run:
                 elif event.key == pygame.K_DOWN:
                     if y < 8: y += 1
                 # number key events
-                elif event.key in possible_numers:
+                elif event.key in possible_numbers:
                     if not b.notes_mode:
-                        b.set_entry(possible_numers.get(event.key))
+                        b.set_entry(possible_numbers.get(event.key))
                         b.set_most_recent(y, x)
                         b.update_surrounding_notes()
                         #print(b.most_recent)
@@ -142,7 +138,7 @@ while run:
                         if event.key == pygame.K_BACKSPACE:
                             b.reset_notes()
                         else:
-                            b.change_cell_notes(possible_numers.get(event.key))
+                            b.change_cell_notes(possible_numbers.get(event.key))
                 # notes mode
                 elif event.key == pygame.K_SPACE:
                     if not b.notes_mode: print("notes mode")
@@ -162,7 +158,8 @@ while run:
                     run = False
     b.set_current_cell(y, x)
 
-    draw_game()
+print("done")
+    #draw_game()
 
 
 
