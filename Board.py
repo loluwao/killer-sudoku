@@ -29,13 +29,12 @@ class Board:
             self.starting_board.append(row)
 
         self.num_solutions = 0
-        self.current_cell = (0, 0) # (x, y)
+        self.current_cell = (0, 0)  # (x, y)
         self.initialize()
         self.remove_nums()
         self.copy_solution()
         self.notes_mode = False
         self.most_recent = ()
-
 
     # initializes a solution board for the game
     def initialize(self):
@@ -55,7 +54,7 @@ class Board:
                                 return True
                 self.solution[r][c] = 0
                 break
-        #self.starting_board = self.solution
+        # self.starting_board = self.solution
         return False
 
     # determines if solution board has been filled with numbers
@@ -73,8 +72,8 @@ class Board:
             print("\n")
 
     # sets the slot at the given row and column to the given number
-    #def set_cell(self, num):
-        #self.user_board[self.current_cell[1]][self.current_cell[0]].set_user_value(num)
+    # def set_cell(self, num):
+    # self.user_board[self.current_cell[1]][self.current_cell[0]].set_user_value(num)
 
     # checks if a number can be put in that row and column
     def can_add_cell(self, row, column, number_to_add):
@@ -109,7 +108,7 @@ class Board:
             for j in range(9):
                 self.starting_board[i][j] = self.solution[i][j]
         nums = random.randint(70, 75)
-        for x in range(nums): #CHANGE BACK
+        for x in range(nums):  # CHANGE BACK
             cell, row, col = 0, 0, 0
             while cell == 0:
                 # pick random row and column
@@ -135,6 +134,7 @@ class Board:
     def reset_notes(self):
         for x in range(1, 10):
             self.user_board[self.current_cell[1]][self.current_cell[0]].notes[x] = False
+
     # sets the current cell to the given number if it wasn't already given
     def set_entry(self, num):
         if self.user_board[self.current_cell[1]][self.current_cell[0]].given:
@@ -147,9 +147,38 @@ class Board:
         for i in range(9):
             for j in range(9):
                 if not self.user_board[i][j].given:
-                    if self.user_board[i][j].user_value != self.solution[i][j]:
+                    if not self.cell_is_allowed(i, j):
                         return False
         return True
+
+    # for the game over function, checks if the cell in a rowxcolumn can be there
+    def cell_is_allowed(self, row, col):
+        num = self.user_board[row][col].user_value
+
+        # check row
+        for i in range(8):
+            if self.user_board[row][i].user_value == num and i != col:
+                return False
+
+        # check column
+        for i in range(8):
+            if self.user_board[i][col].user_value == num and i != row:
+                return False
+
+        # check 3x3 box
+        # find coordinates of 3x3 box
+        x = col // 3
+        y = row // 3
+        x *= 3
+        y *= 3
+
+        for i in range(y, y + 3):
+            for j in range(x, x + 3):
+                if self.user_board[i][j] == num and i != row and j != col:
+                    return False
+
+        return True
+
 
     def set_most_recent(self, row, col):
         self.most_recent = (col, row)
@@ -177,4 +206,3 @@ class Board:
         for r in range(y, y + 3):
             for c in range(x, x + 3):
                 self.user_board[r][c].notes[val] = False
-
