@@ -50,6 +50,7 @@ def draw_game():
         x += 50
         y += 50
 
+
     # draw numbers on board
     x, y = 152, 122
     #num
@@ -89,7 +90,14 @@ def draw_game():
     # MODIFY LATER
     #if b.game_over():
 
-    pygame.draw.rect(win, PURPLE, ((211, 240), (300, 200)))
+    #pygame.draw.rect(win, PURPLE, ((211, 240), (300, 200)))
+
+    if b.game_over():
+        pygame.draw.rect(win, WHITE, ((120, 300), (480, 130)))
+        won = f.render("Congrats!", True, BLACK)
+        win.blit(won, won.get_rect(center=(720/2, 330)))
+        won = f.render("Press the \"r\" key to play again.", True, BLACK)
+        win.blit(won, won.get_rect(center=(720/2, 380)))
 
 
     pygame.display.update()
@@ -115,6 +123,8 @@ while run:
 
     draw_game()
     #b.play_game()
+
+
     if not b.game_over():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -143,6 +153,8 @@ while run:
                 elif event.key == pygame.K_SPACE:
                     if not b.notes_mode: print("notes mode")
                     b.notes_mode = not b.notes_mode
+                elif event.key == pygame.K_r:
+                    b.restart()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
@@ -156,6 +168,12 @@ while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                     run = False
+
+    else:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    b.restart()
     b.set_current_cell(y, x)
 
 print("done")

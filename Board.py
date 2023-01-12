@@ -1,5 +1,4 @@
 import random
-from random import shuffle
 
 from Cell import Cell
 
@@ -43,7 +42,10 @@ class Board:
             r = x // 9
             c = x % 9
             if self.solution[r][c] == 0:
-                shuffle(options)
+                random.seed()
+
+                random.shuffle(options)
+                #print(options)
                 for num in options:
                     if self.can_add_cell(r, c, num):
                         self.solution[r][c] = num
@@ -56,6 +58,64 @@ class Board:
                 break
         # self.starting_board = self.solution
         return False
+
+    def restart(self):
+        self.solution = []
+        self.user_board = []
+        self.starting_board = []
+        # set board with 0's
+        for i in range(9):  # row
+            row = []
+            for j in range(9):  # col
+                row.append(0)
+            self.solution.append(row)
+        for i in range(9):
+            row = []
+            for j in range(9):
+                row.append(0)
+            self.user_board.append(row)
+
+        for i in range(9):
+            row = []
+            for j in range(9):
+                row.append(0)
+            self.starting_board.append(row)
+
+        self.initialize()
+        # self.print_board()
+        self.remove_nums()
+        self.copy_solution()
+        self.most_recent = ()
+        # self.set_current_cell(0, 0)
+    def restart(self):
+        self.solution = []
+        self.user_board = []
+        self.starting_board = []
+        # set board with 0's
+        for i in range(9):  # row
+            row = []
+            for j in range(9):  # col
+                row.append(0)
+            self.solution.append(row)
+        for i in range(9):
+            row = []
+            for j in range(9):
+                row.append(0)
+            self.user_board.append(row)
+
+        for i in range(9):
+            row = []
+            for j in range(9):
+                row.append(0)
+            self.starting_board.append(row)
+
+        self.initialize()
+        #self.print_board()
+        self.remove_nums()
+        self.copy_solution()
+        self.most_recent = ()
+        #self.set_current_cell(0, 0)
+
 
     # determines if solution board has been filled with numbers
     def is_grid_full(self):
@@ -102,6 +162,37 @@ class Board:
         # if all tests pass
         return True
 
+    def empty_cell(self, grid):
+        for i in range(9):
+            for j in range(9):
+                if grid[i][j] == 0:
+                    return True
+
+        return False
+    def solve(self, current_grid):
+        for i in range(0, 81):
+            row = i // 9
+            col = i % 9
+
+            if current_grid[row][col] == 0:
+                print("yo")
+                for num in range(1, 10):
+
+                    if self.can_add_cell(row, col, num):
+                        current_grid[row][col] = num
+                        for y in range(9):
+                            for x in range(9):
+                                if current_grid[y][x] == 0:
+                                    if self.solve(current_grid):
+                                        return True
+                        self.num_solutions += 1
+                        break
+
+                break
+        current_grid[row][col] = 0
+        return False
+
+
     # removes numbers that won't be visible on the board
     def remove_nums(self):
         for i in range(9):
@@ -115,8 +206,17 @@ class Board:
                 row = random.randint(0, 8)
                 col = random.randint(0, 8)
                 cell = self.solution[row][col]
+            # check if it's part of an unavoidable set
+
 
             self.starting_board[row][col] = 0
+            self.num_solutions = 0
+            self.solve(self.starting_board)
+            print(self.num_solutions)
+
+            if self.num_solutions != 1:
+                self.starting_board[row][col] = self.solution[row][col]
+                x -= 1
 
     # transfers solution to the board the user will see
     def copy_solution(self):
