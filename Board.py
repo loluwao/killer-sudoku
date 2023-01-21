@@ -1,3 +1,4 @@
+import copy
 import random
 
 from Cell import Cell
@@ -47,7 +48,7 @@ class Board:
                 random.shuffle(options)
                 #print(options)
                 for num in options:
-                    if self.can_add_cell(r, c, num):
+                    if self.can_add_cell(self.solution, r, c, num):
                         self.solution[r][c] = num
                         if self.is_grid_full():
                             return True
@@ -87,34 +88,6 @@ class Board:
         self.copy_solution()
         self.most_recent = ()
         # self.set_current_cell(0, 0)
-    def restart(self):
-        self.solution = []
-        self.user_board = []
-        self.starting_board = []
-        # set board with 0's
-        for i in range(9):  # row
-            row = []
-            for j in range(9):  # col
-                row.append(0)
-            self.solution.append(row)
-        for i in range(9):
-            row = []
-            for j in range(9):
-                row.append(0)
-            self.user_board.append(row)
-
-        for i in range(9):
-            row = []
-            for j in range(9):
-                row.append(0)
-            self.starting_board.append(row)
-
-        self.initialize()
-        #self.print_board()
-        self.remove_nums()
-        self.copy_solution()
-        self.most_recent = ()
-        #self.set_current_cell(0, 0)
 
 
     # determines if solution board has been filled with numbers
@@ -136,14 +109,14 @@ class Board:
     # self.user_board[self.current_cell[1]][self.current_cell[0]].set_user_value(num)
 
     # checks if a number can be put in that row and column
-    def can_add_cell(self, row, column, number_to_add):
+    def can_add_cell(self, grid, row, column, number_to_add):
         # check row
-        for cell in self.solution[row]:
+        for cell in grid[row]:
             if cell == number_to_add:
                 return False
 
         # check column
-        for i in self.solution:
+        for i in grid:
             if i[column] == number_to_add:
                 return False
 
@@ -156,7 +129,7 @@ class Board:
 
         for r in range(y, y + 3):
             for c in range(x, x + 3):
-                if self.solution[r][c] == number_to_add:
+                if grid[r][c] == number_to_add:
                     return False
 
         # if all tests pass
@@ -175,30 +148,79 @@ class Board:
             col = i % 9
 
             if current_grid[row][col] == 0:
-                print("yo")
                 for num in range(1, 10):
-
-                    if self.can_add_cell(row, col, num):
+                    if self.can_add_cell(current_grid, row, col, num):
                         current_grid[row][col] = num
                         for y in range(9):
                             for x in range(9):
-                                if current_grid[y][x] == 0:
+                                if not self.empty_cell(current_grid):
+                                    self.num_solutions += 1
+                                    break
+                                else:
                                     if self.solve(current_grid):
                                         return True
-                        self.num_solutions += 1
-                        break
 
                 break
-        current_grid[row][col] = 0
+
+                current_grid[row][col] = 0
         return False
 
+    def num_empty(self, grid):
+        count = 0
+        for i in range(9):
+            for j in range(9):
+                if grid[i][j] == 0:
+                    count += 1
+        return count
+
+    def get_avail_squares(self, grid):
+        ls = []
+        for i in range(9):
+            for j in range(9):
+                if grid[i][j] != 0:
+                    ls.append((i, j))
+        random.shuffle(ls)
+        return ls
 
     # removes numbers that won't be visible on the board
     def remove_nums(self):
+        # copy solution
         for i in range(9):
             for j in range(9):
                 self.starting_board[i][j] = self.solution[i][j]
-        nums = random.randint(70, 75)
+
+        squares_left = self.get_avail_squares(self.starting_board)
+        count = len(squares_left)
+        turns = 3
+        c = 0
+        while turns > 0 and count >= 17:
+            print("turn " + str(turns) + ": starting with " + str(self.num_empty(self.starting_board)) + " empty cells")
+            '''
+            cell, row, col = 0, 0, 0
+            while cell == 0:
+                # pick random row and column
+                row = random.randint(0, 8)
+                col = random.randint(0, 8)
+                cell = self.solution[row][col]
+            '''
+            row, col = squares_left.pop()
+            print(str(row) + ", " + str(col))
+            count -= 1
+            cell = self.starting_board[row][col]
+
+            self.starting_board[row][col] = 0
+            self.num_solutions = 0
+            self.solve(copy.deepcopy(self.starting_board))
+            c += 1
+            if self.num_solutions != 1:
+                #print("tried removing " + str(cell) + " didn't work")
+                self.starting_board[row][col] = cell
+                count += 1
+                turns -= 1
+
+        print("total rounds " + str(c))
+        '''
+        nums = random.randint(100, 175)
         for x in range(nums):  # CHANGE BACK
             cell, row, col = 0, 0, 0
             while cell == 0:
@@ -206,17 +228,17 @@ class Board:
                 row = random.randint(0, 8)
                 col = random.randint(0, 8)
                 cell = self.solution[row][col]
+
             # check if it's part of an unavoidable set
-
-
             self.starting_board[row][col] = 0
             self.num_solutions = 0
             self.solve(self.starting_board)
-            print(self.num_solutions)
+            #print(self.num_solutions)
 
             if self.num_solutions != 1:
                 self.starting_board[row][col] = self.solution[row][col]
-                x -= 1
+                #x -= 1
+                '''
 
     # transfers solution to the board the user will see
     def copy_solution(self):
